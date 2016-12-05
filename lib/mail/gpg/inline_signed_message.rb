@@ -45,24 +45,32 @@ module Mail
         end
       end
 
-      END_SIGNED_TEXT = '-----END PGP SIGNED MESSAGE-----'
-      END_SIGNED_TEXT_RE = /^#{END_SIGNED_TEXT}\s*$/
-      INLINE_SIG_RE = Regexp.new('^-----BEGIN.*?SIGN.*?-----\s*$.*^-----END PGP.*?SIGN.*?-----\s*$', Regexp::MULTILINE)
-      BEGIN_SIG_RE = /^(-----BEGIN PGP SIGNATURE-----|-----BEGIN PGP SIGNED MESSAGE-----)\s*$/
+      END_SIGNED_TEXT = '-----END.*?-----'
+      BEGIN_SIGNED_TEXT= /^(-----BEGIN.*?SIGN.*?-----/)\s*$/
 
 
       # utility method to remove inline signature and related pgp markers
       def self.strip_inline_signature(signed_text)
-        if signed_text =~ INLINE_SIG_RE
-          signed_text = signed_text.dup
-          if signed_text !~ END_SIGNED_TEXT_RE
-            # insert the 'end of signed text' marker in case it is missing
-            signed_text = signed_text.gsub BEGIN_SIG_RE, "-----END PGP SIGNED MESSAGE-----\n\\1"
+        skip_next = false
+        stripped_lines = []
+        lines = signed_text.split(/\n/)
+
+        lines.each do |line|
+          if line =~ BEGIN_SIGNED_TEXT
+            skip_next = true
+            next
           end
-          signed_text.gsub! INLINE_SIG_RE, ''
-          signed_text.strip!
+          if skip_next
+            if line =~ /^Hash:.*/
+              skip_next = false
+              next
+            end
+            #do nothing if not Hash...
+          end
+          next if END_SIGNED_TEXT
+          stripped_lines << line
         end
-        signed_text
+        stripped_lines.join("\n") 
       end
 
     end
