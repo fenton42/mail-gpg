@@ -46,7 +46,7 @@ module Mail
       end
 
       END_SIGNED_TEXT = '-----END.*?-----'
-      BEGIN_SIGNED_TEXT= /^(-----BEGIN.*?SIGN.*?-----/)\s*$/
+      BEGIN_SIGNED_TEXT= /^(-----BEGIN.*?SIGN.*?-----)\s*$/
 
 
       # utility method to remove inline signature and related pgp markers
