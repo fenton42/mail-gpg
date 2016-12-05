@@ -45,8 +45,9 @@ module Mail
         end
       end
 
-      END_SIGNED_TEXT = '-----END.*?-----'
-      BEGIN_SIGNED_TEXT= /^(-----BEGIN.*?SIGN.*?-----)\s*$/
+      END_SIGNATURE_TEXT = /^-----END PGP SIGNATURE-----\s*$/
+      BEGIN_SIGNED_TEXT= /^(-----BEGIN PGP SIGNED MESSAGE-----)\s*$/
+      BEGIN_SIGNATURE_TEXT= /^(-----BEGIN PGP SIGNATURE-----)\s*$/
 
 
       # utility method to remove inline signature and related pgp markers
@@ -62,17 +63,21 @@ module Mail
           end
           if skip_next
             if line =~ /^Hash:.*/
-              skip_next = false
               next
             end
-            #do nothing if not Hash...
+            if line =~ /^\s*$/
+              skip_next=false
+              next
+            end
           end
-          next if END_SIGNED_TEXT
+          #no need to do more when signature starts
+          if line =~ BEGIN_SIGNATURE_TEXT
+            break
+          end
           stripped_lines << line
         end
-        stripped_lines.join("\n") 
+        stripped_lines.join("\n")
       end
-
     end
   end
 end
