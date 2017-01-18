@@ -25,6 +25,12 @@ module Extensions
     end 
   end
 
+  module Nil
+    def blank?
+      true
+    end
+  end
+  
   module Object
     def blank?
       respond_to?(:empty?) ? !!empty? : !self
